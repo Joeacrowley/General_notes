@@ -1,0 +1,16 @@
+project:
+  type: book
+
+book:
+  title: "R, general notes"
+  author: "JC"
+  chapters:
+    - index.qmd
+
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    page-layout: full
+    css: dense-notes.css
