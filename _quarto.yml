@@ -6,6 +6,9 @@ book:
   author: "JC"
   chapters:
     - index.qmd
+    - Markdown.qmd
+    - r_tidy_evaluation.qmd
+    - Turning R functions into a package.qmd
 
 
 format:

@@ -1,0 +1,168 @@
+---
+title: "Markdown"
+format: html
+editor: visual
+---
+
+## Nesting tabs
+
+The code for the producing nested tabs with a loop is illustrated below. 
+
+Note the lower level header is exactly one level lower than the top header.
+
+Note the `::: {.panel-tabset}` / `:::` system is for .qmd files only, with .Rmd files you simply write `## {.tabset}` after the **higher level** header, and it cuts out after you write another header of that level. 
+
+The code here is visible only because I've duplicated it outside the `{r}` chunk so it unevaluated, usually it is invisible.
+
+```{}
+
+# ### Level 3 Header
+# 
+# ::: {.panel-tabset}
+# 
+# ```{r, results='asis'}
+# # Example using mtcars dataset grouped by cylinder count
+# groups <- split(mtcars, mtcars$cyl)
+# 
+# for (cyl_group in names(groups)) {
+#   # Print level 4 markdown header
+#   cat("#### Cylinders:", cyl_group, "\n\n")
+#   
+#   # Print the table using knitr::kable
+#   print(knitr::kable(head(groups[[cyl_group]]), format = "markdown"))
+#   
+#   cat("\n\n")  # Spacing between tables
+# }
+# ```
+# 
+# :::
+
+```
+
+<br> 
+
+### Level 3 Header
+
+::: {.panel-tabset}
+
+```{r, results='asis'}
+# Example using mtcars dataset grouped by cylinder count
+groups <- split(mtcars, mtcars$cyl)
+
+for (cyl_group in names(groups)) {
+  # Print level 4 markdown header
+  cat("#### Cylinders:", cyl_group, "\n\n")
+  
+  # Print the table using knitr::kable
+  print(knitr::kable(head(groups[[cyl_group]]), format = "markdown"))
+  
+  cat("\n\n")  # Spacing between tables
+}
+```
+
+:::
+
+<br>
+
+### Applying to ggplot
+
+The only real change from the table version is that you assign the plot to p and call print(p) — the same rule applies as with kable(): inside a loop, ggplot objects must be explicitly printed or knitr drops them silently.
+
+Mixing tables and plots — since both print(knitr::kable(...)) and print(p) work inside the same results='asis' loop, you can easily render a plot and a summary table per tab just by calling both prints before the closing cat("\n\n").
+
+
+```{r}
+
+# ### Cylinder Groups {.unnumbered}
+# 
+# ::: {.panel-tabset}
+# ```{r, results='asis'}
+# library(ggplot2)
+# 
+# groups <- split(mtcars, mtcars$cyl)
+# 
+# for (cyl_group in names(groups)) {
+#   cat("##### Cylinders:", cyl_group, "\n\n")
+#   
+#   p <- ggplot(groups[[cyl_group]], aes(x = wt, y = mpg)) +
+#     geom_point(colour = "steelblue", size = 3) +
+#     geom_smooth(method = "lm", se = FALSE, colour = "firebrick") +
+#     labs(
+#       title = paste("Cylinders:", cyl_group),
+#       x     = "Weight (1000 lbs)",
+#       y     = "Miles per Gallon"
+#     ) +
+#     theme_minimal()
+#   
+#   print(p)
+#   
+#   cat("\n\n")
+# }
+# ```
+#
+# :::
+
+```
+
+#### Cylinder Groups {.unnumbered}
+
+::: {.panel-tabset}
+
+```{r, results='asis'}
+library(ggplot2)
+
+groups <- split(mtcars, mtcars$cyl)
+
+for (cyl_group in names(groups)) {
+  cat("##### Cylinders:", cyl_group, "\n\n")
+  
+  p <- ggplot(groups[[cyl_group]], aes(x = wt, y = mpg)) +
+    geom_point(colour = "steelblue", size = 3) +
+    geom_smooth(method = "lm", se = FALSE, colour = "firebrick") +
+    labs(
+      title = paste("Cylinders:", cyl_group),
+      x     = "Weight (1000 lbs)",
+      y     = "Miles per Gallon"
+    ) +
+    theme_minimal()
+  
+  print(p)
+  
+  cat("\n\n")
+}
+```
+
+:::
+
+<br><br>
+
+### HTML style outputs
+
+::: {.panel-tabset}
+```{r, results='asis'}
+library(flextable)
+library(gtsummary)
+
+groups <- split(mtcars, mtcars$cyl)
+
+for (cyl_group in names(groups)) {
+  cat("### Cylinders:", cyl_group, "\n\n")
+  
+  # --- flextable ---
+  ft <- flextable(head(groups[[cyl_group]])) |>
+    set_caption(paste("Cylinders:", cyl_group)) |>
+    autofit()
+  
+  cat(flextable::flextable_to_rmd(ft), "\n\n")
+
+  # --- OR gtsummary ---
+  gt <- groups[[cyl_group]] |>
+    select(mpg, wt, hp) |>
+    tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) |>
+    bold_labels()
+  
+  cat(as_gt(gt) |> gt::as_raw_html(), "\n\n")
+}
+```
+
+:::

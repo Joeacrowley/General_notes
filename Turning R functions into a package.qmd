@@ -1,0 +1,114 @@
+---
+title: "Making Packages"
+format: html
+editor: visual
+---
+
+A package is just a directory with a structure R enforces strictly enough that `library()`, `devtools::load_all()`, and `install.packages()` can all treat it as a dependency, rather than a pile of scripts you `source()` and hope don't collide with each other. Everything about the workflow follows from that one shift.
+
+Four pieces do almost all the work:
+
+- **DESCRIPTION** -- metadata and, critically, the dependency list (`Imports`). This is what lets R (and a future you, or anyone you hand the code to) know what has to be installed for your functions to run.
+- **R/** -- the actual function code. No different from scripts you already have, except functions inside a package should call other packages' functions explicitly (`dplyr::mutate()`) rather than relying on `library()` calls sitting in the same file, since a package's code can't assume what the *user's* session has attached.
+- **NAMESPACE** -- the public API: which functions are exported (visible to users via `library(yourpkg)`) versus internal helpers, and which functions from *other* packages your code is allowed to use. You essentially never hand-edit this file directly.
+- **man** (+ roxygen comments in R/) -- help pages. The comments live directly above each function (`#' @param`, `#' @return`, etc.), and a tool (`roxygen2`) generates both `NAMESPACE` and the `.Rd` help files from them. This is the important design decision: documentation sits next to the code it documents, so it can't silently drift out of sync the way a separate docs file can.
+
+In my opinion, while they are required, there is never any reason to open and look at either **NAMESPACE** or **man**. 
+
+Why go through this instead of just sourcing scripts, which is what the Quarto-notebook workflow was effectively doing: dependency declarations mean you (or anyone else) can tell what a function needs without reading its body; `?function_name` becomes real, queryable documentation instead of prose scattered through a notebook; `R CMD check` is a free, automated correctness pass that catches undeclared dependencies, broken syntax, and inconsistent documentation before they bite you; and the whole thing becomes installable and shareable as a unit, versioned independently of whatever analysis project happens to be using it.
+
+The entire practical workflow reduces to one loop, repeated as you write or change functions:
+
+**write function + roxygen comment above it → `document()` → `load_all()` to test interactively → `check()` to validate → repeat.**
+
+Everything below is detail on top of that loop.
+
+## Practical steps
+
+1. **Scaffold the package.** Either `usethis::create_package("path/to/pkgname")` (creates `DESCRIPTION`, an empty `R/`, a license stub, etc. in one call), or build the pieces by hand as done for `Quick_descriptives` -- a `DESCRIPTION`, an `R/` folder, and a placeholder `NAMESPACE` that roxygen2 will overwrite on first `document()`.
+
+To use the function create_package() you give it a folder path, and the last component of that path (the folder's own name) becomes the package name by default. So usethis::create_package("~/path/to/pkgname") creates (or uses, if it already exists) a folder called pkgname, and writes Package: pkgname into DESCRIPTION using that same string.
+
+Editing description can be done manually, and a wrong or missing dependency list going unnoticed is exactly the failure mode R CMD check is built to catch. You don't need to get Imports: right by careful reasoning up front — you need to run check() after changes and let it tell you what's wrong, which is fast and deterministic rather than something you have to hold in your head.
+
+Use AI to generate the general text correctly. 
+
+Also, the `attachment` package's `attachment::att_amend_desc()` scans every `R/*.R` file for `pkg::fun()` and rewrites `Imports:`
+
+2. **Move functions into `R/*.R`**, one file per logical group is a reasonable default (we split `Quick_descriptives` into `crosstabs.R`, `missingness.R`, `numeric_summary.R`, etc.). Above each function, write a roxygen block:
+
+```r
+#' One-line title
+#'
+#' Longer description if needed.
+#'
+#' @param data A data frame.
+#' @param vars Character vector of variable names.
+#' @return What it returns and its shape.
+#' @export
+my_function <- function(data, vars) { ... }
+```
+
+`@export` is what makes it part of the public API; leave it off for internal helpers.
+
+3. **Namespace every external call explicitly** (`dplyr::filter()`, not bare `filter()`), and drop any `library()` calls from inside `R/` files entirely -- they don't belong in package code.
+
+4. **Declare dependencies** in `DESCRIPTION` under `Imports:` (either by hand, or `usethis::use_package("dplyr")` which edits it for you). Every package you call with `::` needs to be listed here.
+
+5. **Generate docs and NAMESPACE:**
+
+Set the working directory to your new package directory and run...
+
+```r
+devtools::document()
+```
+
+Run this after *any* change to a roxygen comment or to which functions exist. It writes `man/*.Rd` and regenerates `NAMESPACE`.
+
+6. **Load and test interactively:**
+
+```r
+devtools::load_all()
+```
+
+This behaves like `library(yourpkg)` but reads straight from source, so there's no install step while you're iterating. Try `?your_function` to confirm the help page rendered. Again, requires working directory set, or pass it the path. 
+
+7. **Validate with `R CMD check`:**
+
+```r
+devtools::check()
+```
+
+Reports ERRORs (broken, must fix), WARNINGs (should fix -- often undeclared dependencies or missing docs), and NOTEs (usually minor/stylistic, e.g. "no visible binding for global variable" from tidyverse-style NSE code, which you resolve with `utils::globalVariables()` or `@importFrom rlang .data`). For a personal package, ERRORs matter most; NOTEs are often fine to leave.
+
+8. **(Optional) Add tests:**
+
+```r
+usethis::use_testthat()
+usethis::use_test("my_function")
+   ```
+
+Worth it once the package has more than a handful of functions you don't want to silently regress.
+
+9. **(Optional) Install it properly** once you're happy with it, so it behaves like any other package outside of `load_all()`:
+
+```r
+devtools::install()          # from local source, pass package folder
+devtools::install_local(pkg) # or a path/tarball
+```
+
+10. **(Optional) Documentation site.** Either keep hand-written Quarto docs alongside the package (as we did with `docs/quick_descriptives_demo.qmd`), or generate a browsable reference site automatically from the roxygen comments with `pkgdown::build_site()` (or `altdoc`, which can target Quarto specifically). A PDF reference manual (the CRAN-style one) is `devtools::build_manual()`, which requires a working LaTeX installation.
+
+This requires Latex or TinyTex.
+
+11. **(Optional) Version control and sharing.** `git init` if the folder isn't already tracked; push to GitHub and others can install with `devtools::install_github("you/repo", subdir = "pkgname")` if it's a subdirectory of a larger repo rather than the repo root.
+
+## Software requirements
+
+- **R** itself, obviously.
+- **RStudio** (or another IDE) -- not required, but its "Build" pane and `Cmd/Ctrl+Shift+D`/`L`/`T` shortcuts map directly onto `document()`/`load_all()`/`test()`.
+- **`devtools`, `roxygen2`, `usethis`** -- the whole workflow above leans on these three: `install.packages(c("devtools", "roxygen2", "usethis"))`.
+- **`testthat`** -- only if you add tests (`usethis::use_testthat()` installs/wires it up for you).
+- **LaTeX** -- only needed for `devtools::build_manual()` (the PDF reference manual). Not needed for anything else, including CRAN submission checks in general. TinyTeX (`tinytex::install_tinytex()`) is the lightweight option; MacTeX is the heavier, more reliable fallback on macOS if TinyTeX's installer is having a bad day.
+- **`pkgdown`** -- only if you want an auto-generated HTML reference site instead of (or alongside) hand-written docs.
+- **git** -- not required for any of the above to work locally, but close to essential if you want history, sharing, or a monorepo with multiple packages in it.
