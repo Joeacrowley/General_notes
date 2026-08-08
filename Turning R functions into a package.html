@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="JC">
 
-<title>R, general notes</title>
+<title>4&nbsp; Making Packages – R, general notes</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -31,7 +65,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./Markdown.html" rel="next">
+<link href="./Error_catching.html" rel="next">
+<link href="./r_tidy_evaluation.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -84,7 +119,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">R - General usage notes</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Turning R functions into a package.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Making Packages</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -111,7 +146,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">R - General usage notes</span></span></a>
   </div>
 </li>
@@ -129,7 +164,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./Turning R functions into a package.html" class="sidebar-item-text sidebar-link">
+  <a href="./Turning R functions into a package.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Making Packages</span></span></a>
   </div>
 </li>
@@ -150,27 +185,28 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#practical-steps" id="toc-practical-steps" class="nav-link active" data-scroll-target="#practical-steps"><span class="header-section-number">4.1</span> Practical steps</a></li>
+  <li><a href="#software-requirements" id="toc-software-requirements" class="nav-link" data-scroll-target="#software-requirements"><span class="header-section-number">4.2</span> Software requirements</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">R, general notes</h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Making Packages</span></h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page-right">
+<div class="quarto-title-meta column-body">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>JC </p>
-          </div>
-  </div>
     
   
     
@@ -181,9 +217,92 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Index file.</p>
+<p>A package is just a directory with a structure R enforces strictly enough that <code>library()</code>, <code>devtools::load_all()</code>, and <code>install.packages()</code> can all treat it as a dependency, rather than a pile of scripts you <code>source()</code> and hope don’t collide with each other. Everything about the workflow follows from that one shift.</p>
+<p>Four pieces do almost all the work:</p>
+<ul>
+<li><strong>DESCRIPTION</strong> – metadata and, critically, the dependency list (<code>Imports</code>). This is what lets R (and a future you, or anyone you hand the code to) know what has to be installed for your functions to run.</li>
+<li><strong>R/</strong> – the actual function code. No different from scripts you already have, except functions inside a package should call other packages’ functions explicitly (<code>dplyr::mutate()</code>) rather than relying on <code>library()</code> calls sitting in the same file, since a package’s code can’t assume what the <em>user’s</em> session has attached.</li>
+<li><strong>NAMESPACE</strong> – the public API: which functions are exported (visible to users via <code>library(yourpkg)</code>) versus internal helpers, and which functions from <em>other</em> packages your code is allowed to use. You essentially never hand-edit this file directly.</li>
+<li><strong>man</strong> (+ roxygen comments in R/) – help pages. The comments live directly above each function (<code>#' @param</code>, <code>#' @return</code>, etc.), and a tool (<code>roxygen2</code>) generates both <code>NAMESPACE</code> and the <code>.Rd</code> help files from them. This is the important design decision: documentation sits next to the code it documents, so it can’t silently drift out of sync the way a separate docs file can.</li>
+</ul>
+<p>In my opinion, while they are required, there is never any reason to open and look at either <strong>NAMESPACE</strong> or <strong>man</strong>.</p>
+<p>Why go through this instead of just sourcing scripts, which is what the Quarto-notebook workflow was effectively doing: dependency declarations mean you (or anyone else) can tell what a function needs without reading its body; <code>?function_name</code> becomes real, queryable documentation instead of prose scattered through a notebook; <code>R CMD check</code> is a free, automated correctness pass that catches undeclared dependencies, broken syntax, and inconsistent documentation before they bite you; and the whole thing becomes installable and shareable as a unit, versioned independently of whatever analysis project happens to be using it.</p>
+<p>The entire practical workflow reduces to one loop, repeated as you write or change functions:</p>
+<p><strong>write function + roxygen comment above it → <code>document()</code> → <code>load_all()</code> to test interactively → <code>check()</code> to validate → repeat.</strong></p>
+<p>Everything below is detail on top of that loop.</p>
+<section id="practical-steps" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="practical-steps"><span class="header-section-number">4.1</span> Practical steps</h2>
+<ol type="1">
+<li><strong>Scaffold the package.</strong> Either <code>usethis::create_package("path/to/pkgname")</code> (creates <code>DESCRIPTION</code>, an empty <code>R/</code>, a license stub, etc. in one call), or build the pieces by hand as done for <code>Quick_descriptives</code> – a <code>DESCRIPTION</code>, an <code>R/</code> folder, and a placeholder <code>NAMESPACE</code> that roxygen2 will overwrite on first <code>document()</code>.</li>
+</ol>
+<p>To use the function create_package() you give it a folder path, and the last component of that path (the folder’s own name) becomes the package name by default. So usethis::create_package(“~/path/to/pkgname”) creates (or uses, if it already exists) a folder called pkgname, and writes Package: pkgname into DESCRIPTION using that same string.</p>
+<p>Editing description can be done manually, and a wrong or missing dependency list going unnoticed is exactly the failure mode R CMD check is built to catch. You don’t need to get Imports: right by careful reasoning up front — you need to run check() after changes and let it tell you what’s wrong, which is fast and deterministic rather than something you have to hold in your head.</p>
+<p>Use AI to generate the general text correctly.</p>
+<p>Also, the <code>attachment</code> package’s <code>attachment::att_amend_desc()</code> scans every <code>R/*.R</code> file for <code>pkg::fun()</code> and rewrites <code>Imports:</code></p>
+<ol start="2" type="1">
+<li><strong>Move functions into <code>R/*.R</code></strong>, one file per logical group is a reasonable default (we split <code>Quick_descriptives</code> into <code>crosstabs.R</code>, <code>missingness.R</code>, <code>numeric_summary.R</code>, etc.). Above each function, write a roxygen block:</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' One-line title</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' Longer description if needed.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param data A data frame.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param vars Character vector of variable names.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#' @return What it returns and its shape.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' @export</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>my_function <span class="ot">&lt;-</span> <span class="cf">function</span>(data, vars) { ... }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>@export</code> is what makes it part of the public API; leave it off for internal helpers.</p>
+<ol start="3" type="1">
+<li><p><strong>Namespace every external call explicitly</strong> (<code>dplyr::filter()</code>, not bare <code>filter()</code>), and drop any <code>library()</code> calls from inside <code>R/</code> files entirely – they don’t belong in package code.</p></li>
+<li><p><strong>Declare dependencies</strong> in <code>DESCRIPTION</code> under <code>Imports:</code> (either by hand, or <code>usethis::use_package("dplyr")</code> which edits it for you). Every package you call with <code>::</code> needs to be listed here.</p></li>
+<li><p><strong>Generate docs and NAMESPACE:</strong></p></li>
+</ol>
+<p>Set the working directory to your new package directory and run…</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">document</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run this after <em>any</em> change to a roxygen comment or to which functions exist. It writes <code>man/*.Rd</code> and regenerates <code>NAMESPACE</code>.</p>
+<ol start="6" type="1">
+<li><strong>Load and test interactively:</strong></li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">load_all</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This behaves like <code>library(yourpkg)</code> but reads straight from source, so there’s no install step while you’re iterating. Try <code>?your_function</code> to confirm the help page rendered. Again, requires working directory set, or pass it the path.</p>
+<ol start="7" type="1">
+<li><strong>Validate with <code>R CMD check</code>:</strong></li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Reports ERRORs (broken, must fix), WARNINGs (should fix – often undeclared dependencies or missing docs), and NOTEs (usually minor/stylistic, e.g.&nbsp;“no visible binding for global variable” from tidyverse-style NSE code, which you resolve with <code>utils::globalVariables()</code> or <code>@importFrom rlang .data</code>). For a personal package, ERRORs matter most; NOTEs are often fine to leave.</p>
+<ol start="8" type="1">
+<li><strong>(Optional) Add tests:</strong></li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_testthat</span>()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_test</span>(<span class="st">"my_function"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Worth it once the package has more than a handful of functions you don’t want to silently regress.</p>
+<ol start="9" type="1">
+<li><strong>(Optional) Install it properly</strong> once you’re happy with it, so it behaves like any other package outside of <code>load_all()</code>:</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install</span>()          <span class="co"># from local source, pass package folder</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_local</span>(pkg) <span class="co"># or a path/tarball</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol start="10" type="1">
+<li><strong>(Optional) Documentation site.</strong> Either keep hand-written Quarto docs alongside the package (as we did with <code>docs/quick_descriptives_demo.qmd</code>), or generate a browsable reference site automatically from the roxygen comments with <code>pkgdown::build_site()</code> (or <code>altdoc</code>, which can target Quarto specifically). A PDF reference manual (the CRAN-style one) is <code>devtools::build_manual()</code>, which requires a working LaTeX installation.</li>
+</ol>
+<p>This requires Latex or TinyTex.</p>
+<ol start="11" type="1">
+<li><strong>(Optional) Version control and sharing.</strong> <code>git init</code> if the folder isn’t already tracked; push to GitHub and others can install with <code>devtools::install_github("you/repo", subdir = "pkgname")</code> if it’s a subdirectory of a larger repo rather than the repo root.</li>
+</ol>
+</section>
+<section id="software-requirements" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="software-requirements"><span class="header-section-number">4.2</span> Software requirements</h2>
+<ul>
+<li><strong>R</strong> itself, obviously.</li>
+<li><strong>RStudio</strong> (or another IDE) – not required, but its “Build” pane and <code>Cmd/Ctrl+Shift+D</code>/<code>L</code>/<code>T</code> shortcuts map directly onto <code>document()</code>/<code>load_all()</code>/<code>test()</code>.</li>
+<li><strong><code>devtools</code>, <code>roxygen2</code>, <code>usethis</code></strong> – the whole workflow above leans on these three: <code>install.packages(c("devtools", "roxygen2", "usethis"))</code>.</li>
+<li><strong><code>testthat</code></strong> – only if you add tests (<code>usethis::use_testthat()</code> installs/wires it up for you).</li>
+<li><strong>LaTeX</strong> – only needed for <code>devtools::build_manual()</code> (the PDF reference manual). Not needed for anything else, including CRAN submission checks in general. TinyTeX (<code>tinytex::install_tinytex()</code>) is the lightweight option; MacTeX is the heavier, more reliable fallback on macOS if TinyTeX’s installer is having a bad day.</li>
+<li><strong><code>pkgdown</code></strong> – only if you want an auto-generated HTML reference site instead of (or alongside) hand-written docs.</li>
+<li><strong>git</strong> – not required for any of the above to work locally, but close to essential if you want history, sharing, or a monorepo with multiple packages in it.</li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -586,12 +705,15 @@ ul.task-list li input[type="checkbox"] {
     }
   });
   </script>
-<nav class="page-navigation column-page-right">
+<nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
+      <a href="./r_tidy_evaluation.html" class="pagination-link" aria-label="Tidy Evaluation in R: Data Masking &amp; Non-Standard Evaluation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Tidy Evaluation in R: Data Masking &amp; Non-Standard Evaluation</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./Markdown.html" class="pagination-link" aria-label="Markdown">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Markdown</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./Error_catching.html" class="pagination-link" aria-label="Error catching">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Error catching</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
