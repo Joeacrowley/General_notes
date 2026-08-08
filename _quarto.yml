@@ -10,6 +10,7 @@ book:
     - r_tidy_evaluation.qmd
     - Turning R functions into a package.qmd
     - Error_catching.qmd
+    - Loading_packages_from_GitHub.qmd
 
 
 format:

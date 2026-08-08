@@ -1,0 +1,78 @@
+---
+title: "Loading packages from GitHub"
+format: html
+editor: visual
+---
+
+## Creating a link
+
+My packages are typically in a subfolder of the repo, so you need to load the sub-folder specifically.
+
+```{r, collapse = T}
+
+# Take the link from GitHub - 
+# https://github.com/Joeacrowley/Descriptives/tree/main/dtab
+
+# But some bits need removing...
+
+# Remove 'https://github.com/' from the URL. 
+"Joeacrowley/Descriptives/tree/main/dtab"
+
+# Then remove both 'main' and 'tree':
+# - 'tree' is GitHub's web-routing convention, not required here and will cause an error. 
+# - 'main' is the branch, required only if you want to specify a branch
+
+dtab_link <- "Joeacrowley/Descriptives/dtab"
+
+# If you wanted to specify branch
+"Joeacrowley/Descriptives/dtab@main"
+
+# This quiets warnings relating to my Rstudio theme. 
+options(cli.ignore_unknown_rstudio_theme = TRUE)
+
+```
+
+<br>
+
+## Installation with `pak`
+
+Preferred: `pak` (faster, better dependency resolution than remotes/devtools, and understands sub-directories natively).
+
+It builds a summary of package dependence and compatability, checks it, then installs.
+
+It works well with:
+
+-   `devtools`: pkg-development toolkit. load_all(), document(), check(), test(), build(). For building/testing your own packages.
+
+`remotes`: lightweight installer for non-CRAN sources — GitHub, GitLab, Bitbucket, local, URL. install_github() etc. devtools used to bundle this; now imports it. Predates pak. Slower, weaker dep resolution, no conflict pre-check — but still fine, widely used.
+
+```{r, collapse=T}
+
+# Install package
+pak::pkg_install(dtab_link)
+library(dtab)
+
+# Now can call dtab
+dtab::make_numeric_summary_table(
+  mtcars, 
+  outcomes = names(mtcars), 
+  statistics = c("min", "mean", "max")
+  ) 
+
+```
+
+<br>
+
+`pak` may struggle at work, it needs its own metadata service which can be blocked by corporate proxies. Alternatively, use `remotes::install_github()` or install from a local source.
+
+```{r, eval=F}
+pak::pkg_install("local::C:/path/to/Descriptives/dtab")
+```
+
+<br>
+
+The below might work better at work. The installation itself should be the same, but lacks some of the `pak` checks.
+
+```{r, message=T}
+remotes::install_github("Joeacrowley/Descriptives", subdir = "dtab")
+```

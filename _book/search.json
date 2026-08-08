@@ -208,5 +208,25 @@
     "crumbs": [
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Error catching</span>"
     ]
+  },
+  {
+    "objectID": "Loading_packages_from_GitHub.html",
+    "href": "Loading_packages_from_GitHub.html",
+    "title": "6  Loading packages from GitHub",
+    "section": "",
+    "text": "6.1 Creating a link\nMy packages are typically in a subfolder of the repo, so you need to load the sub-folder specifically.\n# Take the link from GitHub - \n# https://github.com/Joeacrowley/Descriptives/tree/main/dtab\n\n# But some bits need removing...\n\n# Remove 'https://github.com/' from the URL. \n\"Joeacrowley/Descriptives/tree/main/dtab\"\n## [1] \"Joeacrowley/Descriptives/tree/main/dtab\"\n\n# Then remove both 'main' and 'tree':\n# - 'tree' is GitHub's web-routing convention, not required here and will cause an error. \n# - 'main' is the branch, required only if you want to specify a branch\n\ndtab_link &lt;- \"Joeacrowley/Descriptives/dtab\"\n\n# If you wanted to specify branch\n\"Joeacrowley/Descriptives/dtab@main\"\n## [1] \"Joeacrowley/Descriptives/dtab@main\"\n\n# This quiets warnings relating to my Rstudio theme. \noptions(cli.ignore_unknown_rstudio_theme = TRUE)",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Loading packages from GitHub</span>"
+    ]
+  },
+  {
+    "objectID": "Loading_packages_from_GitHub.html#installation-with-pak",
+    "href": "Loading_packages_from_GitHub.html#installation-with-pak",
+    "title": "6  Loading packages from GitHub",
+    "section": "6.2 Installation with pak",
+    "text": "6.2 Installation with pak\nPreferred: pak (faster, better dependency resolution than remotes/devtools, and understands sub-directories natively).\nIt builds a summary of package dependence and compatability, checks it, then installs.\nIt works well with:\n\ndevtools: pkg-development toolkit. load_all(), document(), check(), test(), build(). For building/testing your own packages.\n\nremotes: lightweight installer for non-CRAN sources — GitHub, GitLab, Bitbucket, local, URL. install_github() etc. devtools used to bundle this; now imports it. Predates pak. Slower, weaker dep resolution, no conflict pre-check — but still fine, widely used.\n\n\n# Install package\npak::pkg_install(dtab_link)\n## ! Using bundled GitHub PAT. Please add your own PAT using `gitcreds::gitcreds_set()`.\n## ℹ Loading metadata database\n## ✔ Loading metadata database ... done\n## \n## \n## ℹ No downloads are needed\n## ✔ 1 pkg + 126 deps: kept 43 [5.6s]\nlibrary(dtab)\n\n# Now can call dtab\ndtab::make_numeric_summary_table(\n  mtcars, \n  outcomes = names(mtcars), \n  statistics = c(\"min\", \"mean\", \"max\")\n  ) \n\n\n\nVariableMinMeanMaxBase\n\nmpg10.420.133.932\n\ncyl4.06.28.032\n\ndisp71.1230.7472.032\n\nhp52.0146.7335.032\n\ndrat2.83.64.932\n\nwt1.53.25.432\n\nqsec14.517.822.932\n\nvs0.00.41.032\n\nam0.00.41.032\n\ngear3.03.75.032\n\ncarb1.02.88.032\n\n\n\n\npak may struggle at work, it needs its own metadata service which can be blocked by corporate proxies. Alternatively, use remotes::install_github() or install from a local source.\n\npak::pkg_install(\"local::C:/path/to/Descriptives/dtab\")\n\n\nThe below might work better at work. The installation itself should be the same, but lacks some of the pak checks.\n\nremotes::install_github(\"Joeacrowley/Descriptives\", subdir = \"dtab\")\n\nSkipping install of 'dtab' from a github remote, the SHA1 (101c69d3) has not changed since last install.\n  Use `force = TRUE` to force installation",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Loading packages from GitHub</span>"
+    ]
   }
 ]
