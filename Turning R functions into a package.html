@@ -191,7 +191,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#practical-steps" id="toc-practical-steps" class="nav-link active" data-scroll-target="#practical-steps"><span class="header-section-number">4.1</span> Practical steps</a></li>
-  <li><a href="#software-requirements" id="toc-software-requirements" class="nav-link" data-scroll-target="#software-requirements"><span class="header-section-number">4.2</span> Software requirements</a></li>
+  <li><a href="#quick-updates" id="toc-quick-updates" class="nav-link" data-scroll-target="#quick-updates"><span class="header-section-number">4.2</span> Quick updates</a></li>
+  <li><a href="#software-requirements" id="toc-software-requirements" class="nav-link" data-scroll-target="#software-requirements"><span class="header-section-number">4.3</span> Software requirements</a></li>
   </ul>
 </nav>
     </div>
@@ -286,11 +287,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <p>This requires Latex or TinyTex.</p>
 <ol start="11" type="1">
-<li><strong>(Optional) Version control and sharing.</strong> <code>git init</code> if the folder isn’t already tracked; push to GitHub and others can install with <code>devtools::install_github("you/repo", subdir = "pkgname")</code> if it’s a subdirectory of a larger repo rather than the repo root.</li>
+<li><p><strong>(Optional) Version control and sharing.</strong> <code>git init</code> if the folder isn’t already tracked; push to GitHub and others can install with <code>devtools::install_github("you/repo", subdir = "pkgname")</code> if it’s a subdirectory of a larger repo rather than the repo root.</p></li>
+<li><p>Also useful - <code>devtools::build_manual(pkg = 'file path')</code>. This generates the pdf documentation for a package.</p></li>
 </ol>
+<p><br></p>
 </section>
-<section id="software-requirements" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="software-requirements"><span class="header-section-number">4.2</span> Software requirements</h2>
+<section id="quick-updates" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="quick-updates"><span class="header-section-number">4.2</span> Quick updates</h2>
+<p>When making changes to how functions operate ‘under the hood’, that don’t require new functions to be documented, changes to the arguments of existing functions, etc you can run something like…</p>
+<pre><code> pak::pkg_install("Joeacrowley/Descriptives/dtab").</code></pre>
+<p>This re-installs the package with the code update and after that you can use it as normal, much quicker than running all the steps above each time.</p>
+<p><br></p>
+</section>
+<section id="software-requirements" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="software-requirements"><span class="header-section-number">4.3</span> Software requirements</h2>
 <ul>
 <li><strong>R</strong> itself, obviously.</li>
 <li><strong>RStudio</strong> (or another IDE) – not required, but its “Build” pane and <code>Cmd/Ctrl+Shift+D</code>/<code>L</code>/<code>T</code> shortcuts map directly onto <code>document()</code>/<code>load_all()</code>/<code>test()</code>.</li>
