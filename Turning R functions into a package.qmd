@@ -103,7 +103,21 @@ This requires Latex or TinyTex.
 
 11. **(Optional) Version control and sharing.** `git init` if the folder isn't already tracked; push to GitHub and others can install with `devtools::install_github("you/repo", subdir = "pkgname")` if it's a subdirectory of a larger repo rather than the repo root.
 
-12. Also useful - `devtools::build_manual(pkg = 'file path')`. This generates the pdf documentation for a package. 
+12. Also useful - `devtools::build_manual(pkg = 'file path')`. This generates the pdf documentation for a package.
+
+<br> 
+
+## Quick updates
+
+When making changes to how functions operate 'under the hood', that don't require new functions to be documented, changes to the arguments of existing functions, etc you can run something like...
+
+``` 
+ pak::pkg_install("Joeacrowley/Descriptives/dtab").
+```
+
+This re-installs the package with the code update and after that you can use it as normal, much quicker than running all the steps above each time. 
+
+<br> 
 
 ## Software requirements
 
